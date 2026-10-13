@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend:
+    name: Backend - build y pruebas
+    runs-on: ubuntu-latest
+
+    # Base de datos real para las pruebas (integracion con Testcontainers llegara despues).
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: 1234
+          MYSQL_DATABASE: siga_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -p1234"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Obtener el codigo fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Compilar, ejecutar pruebas y generar reporte de cobertura
+        working-directory: backend
+        env:
+          DB_HOST: localhost
+          DB_PORT: 3306
+          DB_NAME: siga_db
+          DB_USER: root
+          DB_PASSWORD: 1234
+        run: mvn -B verify

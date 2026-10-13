@@ -1,0 +1,90 @@
+{
+  "realm": "siga",
+  "enabled": true,
+  "displayName": "SIGA IPT",
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "accessTokenLifespan": 1800,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "roles": {
+    "realm": [
+      { "name": "ADMIN", "description": "Administrador Academico" },
+      { "name": "TEACHER", "description": "Docente" },
+      { "name": "STUDENT", "description": "Estudiante" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "siga-frontend",
+      "name": "SIGA IPT - Frontend",
+      "description": "Cliente publico usado por el frontend React (Authorization Code + PKCE).",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "bearerOnly": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "siga-backend",
+      "name": "SIGA IPT - Backend",
+      "description": "Cliente bearer-only. El backend solo valida los tokens.",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": true,
+      "standardFlowEnabled": false
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@siga.local",
+      "firstName": "Administrador",
+      "lastName": "Academico",
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "admin123", "temporary": false }
+      ],
+      "realmRoles": ["ADMIN"]
+    },
+    {
+      "username": "teacher",
+      "enabled": true,
+      "email": "teacher@siga.local",
+      "firstName": "Docente",
+      "lastName": "Demo",
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "teacher123", "temporary": false }
+      ],
+      "realmRoles": ["TEACHER"]
+    },
+    {
+      "username": "student",
+      "enabled": true,
+      "email": "student@siga.local",
+      "firstName": "Estudiante",
+      "lastName": "Demo",
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "student123", "temporary": false }
+      ],
+      "realmRoles": ["STUDENT"]
+    }
+  ]
+}
