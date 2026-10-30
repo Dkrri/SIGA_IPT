@@ -2,7 +2,7 @@ package cl.ipt.siga.entities;
 
 import cl.ipt.siga.enums.CareerStatus;
 
-import jakarta.persistence.*; //Guarda objetos Java en una base de datos relacional
+import jakarta.persistence.*; // Persists Java objects in a relational database
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 
-// Entidad Carrera
+// Career entity
 public class CareerEntity {
 
     // Id
@@ -26,28 +26,28 @@ public class CareerEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Codigo
+    // Code
     @Column(nullable = false, unique = true, length = 20)
     private String code;
 
-    // Nombre
+    // Name
     @Column(nullable = false, length = 100)
     private String name;
 
-    // Descripcion
+    // Description
     @Column(nullable = false, length = 500)
     private String description;
 
-    // Estado de la carrera
+    // Career status
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length =20)
     private CareerStatus status = CareerStatus.ACTIVE;
 
-    // Semestres
+    // Semesters
     @Column(nullable = false)
     private Integer semesters = 4;
 
-    // Lista de planes de estudio de la carrera
+    // Study plans of the career
     @OneToMany(mappedBy = "career", fetch = FetchType.LAZY)
     private List<StudyPlanEntity> studyPlans = new ArrayList<>();
 

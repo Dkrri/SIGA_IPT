@@ -17,34 +17,50 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 
-// Estudiante
-public class StudentEntity extends UserProfileEntity {
+// Student
+public class StudentEntity {
 
     // Id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Carrera del estudiante
+    // RUN unique in the system
+    @Column(nullable = false, unique = true, length = 20)
+    private String run;
+
+    // Names
+    @Column(nullable = false, length = 100)
+    private String firstName;
+
+    // Last name
+    @Column(nullable = false, length = 100)
+    private String lastName;
+
+    // Email unique in the system
+    @Column(nullable = false, unique = true, length = 150)
+    private String email;
+
+    // Student's career
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "career_id", nullable = false)
     private CareerEntity career;
 
-    // Plan al que ingreso
+    // Study plan the student entered with
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_plan_id", nullable = false)
     private StudyPlanEntity studyPlan;
 
-    // Estado del estudiante
+    // Student status
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private StudentStatus status = StudentStatus.REGULAR;
 
-    // Matriculas
+    // Matriculations
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
     private List<MatriculationEntity> matriculations = new ArrayList<>();
 
-    // Asignaturas inscritas
+    // Enrolled subjects
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
     private List<EnrollmentEntity> enrollments = new ArrayList<>();
 }

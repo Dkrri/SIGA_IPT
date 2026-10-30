@@ -9,10 +9,10 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 /**
- * Representa la matrícula administrativa de un estudiante en un período académico determinado.
- * NO se gestiona el proceso de matrícula en sí,
- * pero se necesita esta información para validar las inscripciones
- * a cursos durante un período académico.
+ * Administrative matriculation of a student in a given academic period.
+ * The matriculation process itself is not managed by the system,
+ * but this information is needed to validate enrollments
+ * in subjects during an academic period.
  */
 @Entity
 @Table(name = "matriculations",
@@ -22,7 +22,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 
-// Entidad matricula
+// Matriculation entity
 public class MatriculationEntity {
 
     // Id
@@ -30,17 +30,17 @@ public class MatriculationEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Id del estudiante
+    // Student id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
     private StudentEntity student;
 
-    // Periodo
+    // Period
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "academic_period_id", nullable = false)
     private AcademicPeriodEntity academicPeriod;
 
-    // Fecha de la matricula
+    // Matriculation date
     @Column(nullable = false)
     private LocalDate registeredAt;
 }

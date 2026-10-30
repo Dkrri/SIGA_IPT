@@ -10,8 +10,8 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * Registro consolidado que se crea durante el cierre del período académico,
- * para conservar el resultado definitivo en el historial del estudiante.
+ * Consolidated record created during the academic period closing,
+ * to keep the final result in the student's academic history.
  */
 
 @Entity
@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 
-// Entidad Historial académico
+// Academic record entity
 public class AcademicRecordEntity {
 
     // Id
@@ -29,31 +29,31 @@ public class AcademicRecordEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Id del estudiante
+    // Student id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
     private StudentEntity student;
 
-    // Asignatura cursada
+    // Completed subject
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id", nullable = false)
     private SubjectEntity subject;
 
-    // Periodo en el que se curso
+    // Period in which it was taken
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "academic_period_id", nullable = false)
     private AcademicPeriodEntity academicPeriod;
 
-    // Nota final
+    // Final grade
     @Column(nullable = false)
     private Double finalGrade;
 
-    // Aprobado o Reprobado
+    // Approved or failed
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private EnrollmentResult result;
 
-    // Fecha en que se consolido
+    // Consolidation date
     @Column(nullable = false)
     private LocalDateTime consolidatedAt;
 }

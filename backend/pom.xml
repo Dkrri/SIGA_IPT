@@ -132,9 +132,9 @@
                 </executions>
             </plugin>
             <!--
-                Cobertura de pruebas. Por ahora solo genera el reporte (target/site/jacoco).
-                La regla que exige >= 90% en la capa service (job 'check') se activara
-                el Dia 29 del plan, cuando existan las clases de servicio. Ver docs/decisiones.md.
+                Test coverage. For now it only generates the report (target/site/jacoco).
+                The rule requiring >= 90% in the service layer (job 'check') will be enabled
+                on day 29 of the plan, once the service classes exist. See docs/decisiones.md.
             -->
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -157,8 +157,8 @@
                 </executions>
             </plugin>
             <!--
-                Pruebas de integracion (*IT.java). Se ejecutan en la fase 'verify'
-                y quedan separadas de las pruebas unitarias (*Test.java, surefire).
+                Integration tests (*IT.java). They run in the 'verify' phase
+                and are kept separate from unit tests (*Test.java, surefire).
             -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 
-// Plan de estudio
+// Study plan
 public class StudyPlanEntity {
 
     // Id
@@ -26,25 +26,25 @@ public class StudyPlanEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Codigo de plan
+    // Study plan code
     @Column(nullable = false, length = 20)
     private String code;
 
-    // Año del plan
+    // Study plan year
     @Column(nullable = false)
     private Integer year;
 
-    // Estado del plan
+    // Study plan status
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private StudyPlanStatus status = StudyPlanStatus.ACTIVE;
 
-    // Carrera asociada al plan (Muchos planes pertenecen a una carrera)
+    // Career associated with the plan (many plans belong to one career)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "career_id", nullable = false)
     private CareerEntity career;
 
-    // Lista de asignaturas del plan
+    // Study plan subjects
     @OneToMany(mappedBy = "studyPlan", fetch = FetchType.LAZY)
     private List<SubjectEntity> subjects = new ArrayList<>();
 }

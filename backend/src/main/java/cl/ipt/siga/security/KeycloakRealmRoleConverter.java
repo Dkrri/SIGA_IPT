@@ -12,9 +12,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Convierte los roles de Keycloak en "authorities" de Spring Security.
+ * Converts Keycloak roles into Spring Security "authorities".
  *
- * <p>Keycloak guarda los roles de realm dentro del claim:
+ * <p>Keycloak stores realm roles inside the claim:
  * <pre>
  * {
  *   "realm_access": {
@@ -23,13 +23,13 @@ import java.util.stream.Collectors;
  * }
  * </pre>
  *
- * <p>Spring Security, en cambio, espera autoridades con el prefijo {@code ROLE_}.
- * Por eso transformamos cada rol en {@code ROLE_<rol>}: asi el rol {@code ADMIN}
- * de Keycloak se puede exigir en el backend con {@code hasRole("ADMIN")}
- * (Spring agrega el prefijo automaticamente al usar {@code hasRole}).
+ * <p>Spring Security expects authorities prefixed with {@code ROLE_}.
+ * Therefore each role is transformed into {@code ROLE_<role>}: this way the
+ * Keycloak {@code ADMIN} role can be required in the backend with
+ * {@code hasRole("ADMIN")} (Spring adds the prefix automatically).
  *
- * <p>Sin esta clase, el token seria valido pero el usuario no tendria ningun rol
- * reconocido por el backend (el error mas comun al integrar Keycloak).
+ * <p>Without this class, the token would be valid but the user would have no
+ * role recognized by the backend (the most common mistake when integrating Keycloak).
  */
 public class KeycloakRealmRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 

@@ -1,9 +1,9 @@
 package cl.ipt.siga.enums;
 
 public enum StudentStatus {
-    REGULAR, // estudiante habilitado académicamente para continuar sus estudios.
-    POSTPONEMENT, // estudiante que ha postergado sus estudios.
-    TEMPORARY_WITHDRAWAL, // estudiante que ha interrumpido temporalmente sus estudios.
-    GRADUATED, // estudiante que ha aprobado todas las asignaturas correspondientes a su plan de estudios.
-    ELIMINATED // estudiante que ha perdido su condición de estudiante de la carrera por haber reprobado una misma asignatura por segunda vez.
+    REGULAR, // student academically enabled to continue studying.
+    POSTPONEMENT, // student who has postponed studies.
+    TEMPORARY_WITHDRAWAL, // student who temporarily interrupted studies.
+    GRADUATED, // student who has approved every subject in their study plan.
+    ELIMINATED // student who lost their status after failing the same subject a second time.
 }

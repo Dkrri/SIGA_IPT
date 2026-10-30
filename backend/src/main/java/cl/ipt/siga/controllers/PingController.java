@@ -11,24 +11,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Controlador minimo para verificar que la seguridad funciona.
- * (En el Dia 2 del plan se valida el Hito 0 con estos endpoints.)
+ * Minimal controller to verify that security works.
+ * (Milestone 0 is validated with these endpoints on Day 2 of the plan.)
  */
 @RestController
 @RequestMapping("/api")
 public class PingController {
 
-    /** Publico: no requiere token. */
+    /** Public: no token required. */
     @GetMapping("/public/ping")
     public Map<String, Object> publicPing() {
         Map<String, Object> body = new HashMap<>();
         body.put("status", "ok");
         body.put("scope", "public");
-        body.put("message", "Endpoint publico: no requiere token");
+        body.put("message", "Public endpoint: no token required");
         return body;
     }
 
-    /** Requiere token valido (cualquier rol). Devuelve datos del usuario del token. */
+    /** Requires a valid token (any role). Returns data from the token. */
     @GetMapping("/ping")
     public Map<String, Object> privatePing(@AuthenticationPrincipal Jwt jwt) {
         Map<String, Object> body = new HashMap<>();
@@ -40,14 +40,14 @@ public class PingController {
         return body;
     }
 
-    /** Solo ADMIN: demuestra la verificacion de roles con @PreAuthorize. */
+    /** ADMIN only: demonstrates role validation with @PreAuthorize. */
     @GetMapping("/admin/ping")
     @PreAuthorize("hasRole('ADMIN')")
     public Map<String, Object> adminPing() {
         Map<String, Object> body = new HashMap<>();
         body.put("status", "ok");
         body.put("scope", "admin");
-        body.put("message", "Solo accesible con rol ADMIN");
+        body.put("message", "Accessible only with ADMIN role");
         return body;
     }
 }

@@ -19,27 +19,27 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Configuracion central de seguridad del backend.
+ * Central security configuration of the backend.
  *
- * <p>El backend actua como <b>OAuth2 Resource Server</b>: no emite tokens ni
- * guarda contrasenas, solo <b>valida</b> los tokens JWT que emite Keycloak.
+ * <p>The backend acts as an <b>OAuth2 Resource Server</b>: it does not issue tokens
+ * or store passwords; it only <b>validates</b> the JWT tokens issued by Keycloak.
  *
- * <p>Responsabilidades de esta clase:
+ * <p>Responsibilities of this class:
  * <ol>
- *   <li>Definir que endpoints son publicos y cuales requieren autenticacion.</li>
- *   <li>Configurar el backend como resource server (validacion del JWT).</li>
- *   <li>Traducir los roles del token a autoridades de Spring (ver
+ *   <li>Define which endpoints are public and which require authentication.</li>
+ *   <li>Configure the backend as a resource server (JWT validation).</li>
+ *   <li>Translate token roles into Spring authorities (see
  *       {@link KeycloakRealmRoleConverter}).</li>
- *   <li>Construir el {@link JwtDecoder} con el cual se verifica la firma y el emisor.</li>
+ *   <li>Build the {@link JwtDecoder} used to verify the signature and the issuer.</li>
  * </ol>
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // habilita @PreAuthorize en controladores y servicios
+@EnableMethodSecurity // enables @PreAuthorize in controllers and services
 public class SecurityConfig {
 
     /**
-     * Cadena de filtros de seguridad: define las reglas de acceso.
+     * Security filter chain: defines the access rules.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -47,27 +47,27 @@ public class SecurityConfig {
             JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
 
         http
-                // API REST stateless: no se usan sesiones ni formularios de login.
+                // Stateless REST API: no sessions and no login forms.
                 .csrf(csrf -> csrf.disable())
-                .cors(Customizer.withDefaults()) // usa el bean CorsConfigurationSource
+                .cors(Customizer.withDefaults()) // uses the CorsConfigurationSource bean
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Reglas de autorizacion por ruta.
+                // Authorization rules per route.
                 .authorizeHttpRequests(auth -> auth
-                        // El preflight de CORS (OPTIONS) siempre debe pasar.
+                        // The CORS preflight (OPTIONS) must always pass.
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Endpoints publicos y documentacion.
+                        // Public endpoints and documentation.
                         .requestMatchers(
                                 "/api/public/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        // Todo lo demas exige un token valido.
+                        // Every other request requires a valid token.
                         .anyRequest().authenticated()
                 )
 
-                // Activar la validacion de JWT y la conversion de roles.
+                // Enable JWT validation and role conversion.
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
                 );
@@ -76,8 +76,8 @@ public class SecurityConfig {
     }
 
     /**
-     * Convierte el claim {@code realm_access.roles} del token de Keycloak
-     * en autoridades {@code ROLE_*} reconocidas por Spring Security.
+     * Converts the Keycloak {@code realm_access.roles} claim into
+     * {@code ROLE_*} authorities recognized by Spring Security.
      */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
@@ -87,12 +87,12 @@ public class SecurityConfig {
     }
 
     /**
-     * Construye el decodificador de JWT.
+     * Builds the JWT decoder.
      *
-     * <p>Se usa explicitamente el {@code jwk-set-uri} (llaves publicas) en lugar
-     * de solo el {@code issuer-uri}, porque asi la aplicacion no intenta
-     * contactar a Keycloak al arrancar. Las llaves se descargan la primera vez
-     * que llega un token. Ademas se valida el emisor ("iss") por seguridad.
+     * <p>The {@code jwk-set-uri} (public keys) is used explicitly instead of
+     * only {@code issuer-uri}, because this way the application does not
+     * contact Keycloak on startup. The keys are downloaded the first time
+     * a token arrives. The issuer ("iss") is also validated for security.
      */
     @Bean
     public JwtDecoder jwtDecoder(
@@ -101,7 +101,7 @@ public class SecurityConfig {
 
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
 
-        // Valida firma, expiracion y que el emisor sea el esperado.
+        // Validate signature, expiration and that the issuer is the expected one.
         OAuth2TokenValidator<Jwt> issuerValidator = JwtValidators.createDefaultWithIssuer(issuerUri);
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(issuerValidator));
 

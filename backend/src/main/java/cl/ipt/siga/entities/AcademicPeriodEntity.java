@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 
-// Periodo academico
+// Academic period
 public class AcademicPeriodEntity {
 
     // Id
@@ -26,32 +26,32 @@ public class AcademicPeriodEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Nomenclatura 2027-1 o 2027-2
+    // Code format: 2027-1 or 2027-2
     @Column(nullable = false, unique = true, length = 10)
     private String code;
 
-    // Año
+    // Year
     @Column(nullable = false)
     private Integer year;
 
-    // Semestre
+    // Semester
     @Column(nullable = false)
     private Integer semester;
 
-    // Estado del periodo academico
+    // Academic period status
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private AcademicPeriodStatus status = AcademicPeriodStatus.OPEN;
 
-    // List de secciones
+    // Sections
     @OneToMany(mappedBy = "academicPeriod", fetch = FetchType.LAZY)
     private List<SectionEntity> sections = new ArrayList<>();
 
-    // Inscripciones del periodo
+    // Period enrollments
     @OneToMany(mappedBy = "academicPeriod", fetch = FetchType.LAZY)
     private List<EnrollmentEntity> enrollments = new ArrayList<>();
 
-    // Matriculas del periodo
+    // Period matriculations
     @OneToMany(mappedBy = "academicPeriod", fetch = FetchType.LAZY)
     private List<MatriculationEntity> matriculations = new ArrayList<>();
 }

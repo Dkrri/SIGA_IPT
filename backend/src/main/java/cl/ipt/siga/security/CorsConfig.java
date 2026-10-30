@@ -11,16 +11,16 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Configuracion de CORS (Cross-Origin Resource Sharing).
+ * CORS (Cross-Origin Resource Sharing) configuration.
  *
- * <p>El navegador bloquea por defecto las peticiones que el frontend (por ejemplo
- * http://localhost:5173) hace al backend (http://localhost:8080) porque son
- * origenes distintos. CORS le indica al navegador que esos origenes estan
- * autorizados.
+ * <p>By default, the browser blocks requests from the frontend (for example
+ * http://localhost:5173) to the backend (http://localhost:8080) because they
+ * are different origins. CORS tells the browser that those origins are
+ * authorized.
  *
- * <p>Los origenes permitidos se leen desde la variable de entorno
- * {@code CORS_ALLOWED_ORIGINS} (por defecto el frontend de desarrollo en el
- * puerto 5173). Nunca se usa {@code *} porque se envian credenciales (token).
+ * <p>Allowed origins are read from the environment variable
+ * {@code CORS_ALLOWED_ORIGINS} (defaults to the development frontend on
+ * port 5173). {@code *} is never used because credentials (the token) are sent.
  */
 @Configuration
 public class CorsConfig {

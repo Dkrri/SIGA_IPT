@@ -1,13 +1,13 @@
-# Docker Compose para DESARROLLO LOCAL.
-# Levanta solo la infraestructura: MySQL y Keycloak.
-# El backend y el frontend se ejecutan desde el IDE / terminal durante el desarrollo.
+# Docker Compose for LOCAL DEVELOPMENT.
+# Starts only the infrastructure: MySQL and Keycloak.
+# The backend and frontend run from the IDE / terminal during development.
 #
-# Uso:
+# Usage:
 #   docker compose -f docker-compose.dev.yml up -d
 #   docker compose -f docker-compose.dev.yml down
 #
-# Keycloak queda en  http://localhost:8081  (admin consola: admin / admin)
-# MySQL queda en     localhost:3306
+# Keycloak is available at  http://localhost:8081  (admin console: admin / admin)
+# MySQL is available at     localhost:3306
 
 services:
   mysql:
@@ -29,13 +29,13 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
     container_name: siga-keycloak
-    # start-dev = modo desarrollo. --import-realm carga keycloak/realm-export.json.
+    # start-dev = development mode. --import-realm loads keycloak/realm-export.json.
     command:
       - start-dev
       - --import-realm
       - --http-port=8080
     environment:
-      # Credenciales del usuario administrador de la consola de Keycloak.
+      # Credentials for the Keycloak console administrator.
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_ADMIN_USER:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:-admin}
     ports:

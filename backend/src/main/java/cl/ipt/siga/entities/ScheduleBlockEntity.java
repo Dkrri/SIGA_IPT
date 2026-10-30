@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 
-// Entidad del bloque horario
+// Schedule block entity
 public class ScheduleBlockEntity {
 
     // Id
@@ -23,16 +23,16 @@ public class ScheduleBlockEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Dia (L/M/W/J/V)
+    // Weekday (L/M/W/J/V)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private Weekday weekday;
 
-    // Modulo 1 a 6
+    // Module 1 to 6
     @Column(nullable = false)
     private Integer module;
 
-    // Seccion a la que pertenece
+    // Section it belongs to
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "section_id", nullable = false)
     private SectionEntity section;

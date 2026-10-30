@@ -1,8 +1,8 @@
 package cl.ipt.siga.enums;
 
 /**
- * Weekdays with the codes used by SIGA IPT: L (lunes), M (martes),
- * W (miercoles), J (jueves) and V (viernes).
+ * Weekdays with the codes used by SIGA IPT: L (Monday), M (Tuesday),
+ * W (Wednesday), J (Thursday) and V (Friday).
  */
 public enum Weekday {
     MONDAY("L"),

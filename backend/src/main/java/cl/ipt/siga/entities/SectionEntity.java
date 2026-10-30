@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 
-// Entidad seccion
+// Section entity
 public class SectionEntity {
 
     // Id
@@ -25,30 +25,33 @@ public class SectionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Asignatura de la seccion
+    // Section subject
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id", nullable = false)
     private SubjectEntity subject;
 
-    // Periodo en el que se imparte
+    // Period in which it is taught
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "academic_period_id", nullable = false)
     private AcademicPeriodEntity academicPeriod;
 
-    // Docente responsable
+    // Responsible teacher
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable = false)
     private TeacherEntity teacher;
 
-    // Maximo de estudiantes 1 a 60
+    // Maximum number of students: 1 to 60
     @Column(nullable = false)
     private Integer capacity;
 
-    // Bloque de horarios
-    @OneToMany(mappedBy = "section", fetch = FetchType.LAZY)
+    // Schedule blocks
+    // cascade + orphanRemoval: saving the section saves its blocks,
+    // and replacing them on update removes the previous ones.
+    @OneToMany(mappedBy = "section", fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ScheduleBlockEntity> scheduleBlocks = new ArrayList<>();
 
-    // Alumnos inscritos
+    // Enrolled students
     @OneToMany(mappedBy = "section", fetch = FetchType.LAZY)
     private List<EnrollmentEntity> enrollments = new ArrayList<>();
 }
