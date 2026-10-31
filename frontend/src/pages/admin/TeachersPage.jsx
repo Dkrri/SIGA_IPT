@@ -17,10 +17,13 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import teacherService from '../../services/teacherService';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import PageHeader from '../../components/common/PageHeader';
+import { TEACHER_STATUS_LABELS, labelFor } from '../../ui/labels';
+import { isValidRun } from '../../ui/validation';
 import { getErrorMessage } from '../../http-common';
 
 const emptyForm = {
@@ -30,6 +33,7 @@ const emptyForm = {
   email: '',
   professionalTitle: '',
   academicDegree: '',
+  temporaryPassword: '',
 };
 
 /** Teachers: create, edit, activate/deactivate and delete. */
@@ -79,11 +83,18 @@ export default function TeachersPage() {
       email: teacher.email,
       professionalTitle: teacher.professionalTitle,
       academicDegree: teacher.academicDegree,
+      temporaryPassword: '',
     });
     setFormOpen(true);
   };
 
   const handleSave = async () => {
+    if (!editing && !isValidRun(form.run.trim())) {
+      setError('El RUN debe tener el formato 1111111-1.');
+      setSuccess('');
+      return;
+    }
+
     setSaving(true);
     setError('');
     setSuccess('');
@@ -97,10 +108,10 @@ export default function TeachersPage() {
           professionalTitle: form.professionalTitle,
           academicDegree: form.academicDegree,
         });
-        setSuccess(`Teacher ${editing.run} updated.`);
+        setSuccess(`Docente ${editing.run} actualizado.`);
       } else {
-        await teacherService.create(form);
-        setSuccess(`Teacher ${form.run} created.`);
+        await teacherService.create({ ...form, run: form.run.trim() });
+        setSuccess(`Docente ${form.run} creado. Debe cambiar la contraseña en su primer inicio de sesión.`);
       }
       setFormOpen(false);
       await loadTeachers();
@@ -117,7 +128,7 @@ export default function TeachersPage() {
     try {
       const status = teacher.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
       await teacherService.changeStatus(teacher.id, status);
-      setSuccess(`Teacher ${teacher.run} is now ${status}.`);
+      setSuccess(`El docente ${teacher.run} ahora está ${labelFor(TEACHER_STATUS_LABELS, status)}.`);
       await loadTeachers();
     } catch (requestError) {
       setError(getErrorMessage(requestError));
@@ -130,7 +141,7 @@ export default function TeachersPage() {
     setSuccess('');
     try {
       await teacherService.remove(toDelete.id);
-      setSuccess(`Teacher ${toDelete.run} deleted.`);
+      setSuccess(`Docente ${toDelete.run} eliminado.`);
       setToDelete(null);
       await loadTeachers();
     } catch (requestError) {
@@ -141,12 +152,22 @@ export default function TeachersPage() {
     }
   };
 
+  const runError =
+    !editing && form.run.length > 0 && !isValidRun(form.run.trim())
+      ? 'Formato esperado: 1111111-1'
+      : '';
+
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>Teachers</Typography>
-        <Button variant="contained" onClick={openCreate}>New teacher</Button>
-      </Box>
+      <PageHeader
+        title="Docentes"
+        subtitle="Gestiona los datos y el estado de los docentes."
+        action={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}>
+            Nuevo docente
+          </Button>
+        }
+      />
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
@@ -159,12 +180,12 @@ export default function TeachersPage() {
             <TableHead>
               <TableRow>
                 <TableCell>RUN</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Title</TableCell>
-                <TableCell>Degree</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>Nombre</TableCell>
+                <TableCell>Correo</TableCell>
+                <TableCell>Título profesional</TableCell>
+                <TableCell>Grado académico</TableCell>
+                <TableCell>Estado</TableCell>
+                <TableCell align="right">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -178,24 +199,24 @@ export default function TeachersPage() {
                   <TableCell>
                     <Chip
                       size="small"
-                      label={teacher.status}
+                      label={labelFor(TEACHER_STATUS_LABELS, teacher.status)}
                       color={teacher.status === 'ACTIVE' ? 'success' : 'default'}
                     />
                   </TableCell>
                   <TableCell align="right">
-                    <Button size="small" onClick={() => openEdit(teacher)}>Edit</Button>
+                    <Button size="small" onClick={() => openEdit(teacher)}>Editar</Button>
                     <Button size="small" onClick={() => handleStatus(teacher)}>
-                      {teacher.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                      {teacher.status === 'ACTIVE' ? 'Desactivar' : 'Activar'}
                     </Button>
                     <Button size="small" color="error" onClick={() => setToDelete(teacher)}>
-                      Delete
+                      Eliminar
                     </Button>
                   </TableCell>
                 </TableRow>
               ))}
               {teachers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">No teachers yet.</TableCell>
+                  <TableCell colSpan={7} align="center">Aún no hay docentes registrados.</TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -204,7 +225,7 @@ export default function TeachersPage() {
       )}
 
       <Dialog open={formOpen} onClose={saving ? undefined : () => setFormOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>{editing ? 'Edit teacher' : 'New teacher'}</DialogTitle>
+        <DialogTitle>{editing ? 'Editar docente' : 'Nuevo docente'}</DialogTitle>
         <DialogContent>
           {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
           <TextField
@@ -214,24 +235,27 @@ export default function TeachersPage() {
             value={form.run}
             onChange={(event) => setForm({ ...form, run: event.target.value })}
             disabled={Boolean(editing)}
-            helperText={editing ? 'RUN cannot be changed.' : ''}
+            error={Boolean(runError)}
+            helperText={
+              editing ? 'El RUN no se puede modificar.' : runError || 'Formato: 1111111-1'
+            }
           />
           <TextField
-            label="First name"
+            label="Nombre"
             fullWidth
             margin="dense"
             value={form.firstName}
             onChange={(event) => setForm({ ...form, firstName: event.target.value })}
           />
           <TextField
-            label="Last name"
+            label="Apellido"
             fullWidth
             margin="dense"
             value={form.lastName}
             onChange={(event) => setForm({ ...form, lastName: event.target.value })}
           />
           <TextField
-            label="Email"
+            label="Correo"
             type="email"
             fullWidth
             margin="dense"
@@ -239,33 +263,47 @@ export default function TeachersPage() {
             onChange={(event) => setForm({ ...form, email: event.target.value })}
           />
           <TextField
-            label="Professional title"
+            label="Título profesional"
             fullWidth
             margin="dense"
             value={form.professionalTitle}
             onChange={(event) => setForm({ ...form, professionalTitle: event.target.value })}
           />
           <TextField
-            label="Academic degree"
+            label="Grado académico"
             fullWidth
             margin="dense"
             value={form.academicDegree}
             onChange={(event) => setForm({ ...form, academicDegree: event.target.value })}
           />
+          {!editing && (
+            <TextField
+              label="Contraseña temporal"
+              type="password"
+              fullWidth
+              margin="dense"
+              value={form.temporaryPassword}
+              onChange={(event) =>
+                setForm({ ...form, temporaryPassword: event.target.value })
+              }
+              helperText="El docente deberá cambiarla en su primer inicio de sesión."
+              autoComplete="new-password"
+            />
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancelar</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? 'Guardando...' : 'Guardar'}
           </Button>
         </DialogActions>
       </Dialog>
 
       <ConfirmDialog
         open={Boolean(toDelete)}
-        title="Delete teacher"
-        message={`Delete ${toDelete?.run}? It cannot have associated sections.`}
-        confirmLabel="Delete"
+        title="Eliminar docente"
+        message={`¿Eliminar ${toDelete?.run}? No debe tener secciones asociadas.`}
+        confirmLabel="Eliminar"
         loading={deleting}
         onConfirm={confirmDelete}
         onClose={() => setToDelete(null)}

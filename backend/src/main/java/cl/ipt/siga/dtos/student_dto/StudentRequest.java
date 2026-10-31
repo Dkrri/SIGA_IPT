@@ -3,6 +3,7 @@ package cl.ipt.siga.dtos.student_dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,6 +25,9 @@ public class StudentRequest {
 
     @NotBlank(message = "RUN is required")
     @Size(max = 20, message = "RUN cannot exceed 20 characters")
+    @Pattern(
+            regexp = "^\\d{7,8}-[0-9Kk]$",
+            message = "RUN must have the format 1111111-1")
     private String run;
 
     @NotBlank(message = "First name is required")
@@ -41,4 +45,8 @@ public class StudentRequest {
 
     @NotNull(message = "Career is required")
     private Long careerId;
+
+    @NotBlank(message = "Temporary password is required")
+    @Size(min = 8, max = 72, message = "Temporary password must be between 8 and 72 characters")
+    private String temporaryPassword;
 }

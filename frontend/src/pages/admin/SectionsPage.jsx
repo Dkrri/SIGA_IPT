@@ -19,11 +19,19 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import academicPeriodService from '../../services/academicPeriodService';
 import sectionService from '../../services/sectionService';
 import subjectService from '../../services/subjectService';
 import teacherService from '../../services/teacherService';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import PageHeader from '../../components/common/PageHeader';
+import {
+  ACADEMIC_PERIOD_STATUS_LABELS,
+  TEACHER_STATUS_LABELS,
+  WEEKDAY_LABELS,
+  labelFor,
+} from '../../ui/labels';
 import { getErrorMessage } from '../../http-common';
 
 const WEEKDAYS = [
@@ -169,11 +177,11 @@ export default function SectionsPage() {
     setSuccess('');
 
     if (!form.subjectId || !form.academicPeriodId || !form.teacherId) {
-      setError('Subject, period and teacher are required.');
+      setError('Asignatura, período y docente son obligatorios.');
       return;
     }
     if (requiredBlocks !== null && form.scheduleBlocks.length !== requiredBlocks) {
-      setError(`This subject requires exactly ${requiredBlocks} schedule blocks.`);
+      setError(`Esta asignatura requiere exactamente ${requiredBlocks} bloques de horario.`);
       return;
     }
 
@@ -181,7 +189,7 @@ export default function SectionsPage() {
       (block) => `${block.weekday}-${block.module}`
     );
     if (new Set(keys).size !== keys.length) {
-      setError('Schedule blocks cannot be repeated.');
+      setError('Los bloques de horario no se pueden repetir.');
       return;
     }
 
@@ -200,10 +208,10 @@ export default function SectionsPage() {
 
       if (editing) {
         await sectionService.update(editing.id, payload);
-        setSuccess(`Section ${editing.subjectCode} updated.`);
+        setSuccess(`Sección ${editing.subjectCode} actualizada.`);
       } else {
         await sectionService.create(payload);
-        setSuccess('Section created.');
+        setSuccess('Sección creada.');
       }
       setFormOpen(false);
       await loadSections(periodId);
@@ -220,7 +228,7 @@ export default function SectionsPage() {
     setSuccess('');
     try {
       await sectionService.remove(toDelete.id);
-      setSuccess(`Section ${toDelete.subjectCode} deleted.`);
+      setSuccess(`Sección ${toDelete.subjectCode} eliminada.`);
       setToDelete(null);
       await loadSections(periodId);
     } catch (requestError) {
@@ -233,23 +241,31 @@ export default function SectionsPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>Sections</Typography>
-        <Button variant="contained" onClick={openCreate} disabled={!periodId}>
-          New section
-        </Button>
-      </Box>
+      <PageHeader
+        title="Secciones"
+        subtitle="Crea secciones por período, asigna docentes y define cupos y horarios."
+        action={
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={openCreate}
+            disabled={!periodId}
+          >
+            Nueva sección
+          </Button>
+        }
+      />
 
       <TextField
         select
-        label="Academic period"
+        label="Período académico"
         value={periodId}
         onChange={(event) => setPeriodId(event.target.value)}
-        sx={{ minWidth: 240, mb: 2 }}
+        sx={{ minWidth: 260, mb: 2 }}
       >
         {periods.map((period) => (
           <MenuItem key={period.id} value={String(period.id)}>
-            {period.code} ({period.status})
+            {period.code} ({labelFor(ACADEMIC_PERIOD_STATUS_LABELS, period.status)})
           </MenuItem>
         ))}
       </TextField>
@@ -264,11 +280,11 @@ export default function SectionsPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Subject</TableCell>
-                <TableCell>Teacher</TableCell>
-                <TableCell>Capacity</TableCell>
-                <TableCell>Schedule</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>Asignatura</TableCell>
+                <TableCell>Docente</TableCell>
+                <TableCell>Cupos</TableCell>
+                <TableCell>Horario</TableCell>
+                <TableCell align="right">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -283,9 +299,9 @@ export default function SectionsPage() {
                     {section.scheduleBlocks.map((block) => block.code).join(', ')}
                   </TableCell>
                   <TableCell align="right">
-                    <Button size="small" onClick={() => openEdit(section)}>Edit</Button>
+                    <Button size="small" onClick={() => openEdit(section)}>Editar</Button>
                     <Button size="small" color="error" onClick={() => setToDelete(section)}>
-                      Delete
+                      Eliminar
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -293,7 +309,7 @@ export default function SectionsPage() {
               {sections.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} align="center">
-                    This period has no sections.
+                    Este período no tiene secciones.
                   </TableCell>
                 </TableRow>
               )}
@@ -303,12 +319,12 @@ export default function SectionsPage() {
       )}
 
       <Dialog open={formOpen} onClose={saving ? undefined : () => setFormOpen(false)} fullWidth maxWidth="md">
-        <DialogTitle>{editing ? 'Edit section' : 'New section'}</DialogTitle>
+        <DialogTitle>{editing ? 'Editar sección' : 'Nueva sección'}</DialogTitle>
         <DialogContent>
           {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
           <TextField
             select
-            label="Subject"
+            label="Asignatura"
             fullWidth
             margin="dense"
             value={form.subjectId}
@@ -323,7 +339,7 @@ export default function SectionsPage() {
           <Box sx={{ display: 'flex', gap: 1 }}>
             <TextField
               select
-              label="Academic period"
+              label="Período académico"
               fullWidth
               margin="dense"
               value={form.academicPeriodId}
@@ -331,13 +347,13 @@ export default function SectionsPage() {
             >
               {periods.map((period) => (
                 <MenuItem key={period.id} value={String(period.id)}>
-                  {period.code} ({period.status})
+                  {period.code} ({labelFor(ACADEMIC_PERIOD_STATUS_LABELS, period.status)})
                 </MenuItem>
               ))}
             </TextField>
             <TextField
               select
-              label="Teacher"
+              label="Docente"
               fullWidth
               margin="dense"
               value={form.teacherId}
@@ -345,13 +361,16 @@ export default function SectionsPage() {
             >
               {teachers.map((teacher) => (
                 <MenuItem key={teacher.id} value={String(teacher.id)}>
-                  {teacher.firstName} {teacher.lastName} ({teacher.status})
+                  {teacher.firstName} {teacher.lastName} ({labelFor(
+                    TEACHER_STATUS_LABELS,
+                    teacher.status
+                  )})
                 </MenuItem>
               ))}
             </TextField>
           </Box>
           <TextField
-            label="Capacity"
+            label="Cupos"
             type="number"
             fullWidth
             margin="dense"
@@ -361,25 +380,27 @@ export default function SectionsPage() {
           />
 
           <Typography variant="subtitle2" sx={{ mt: 1 }}>
-            Schedule blocks
-            {requiredBlocks !== null && ` (required: ${requiredBlocks})`}
+            Bloques de horario
+            {requiredBlocks !== null && ` (requeridos: ${requiredBlocks})`}
           </Typography>
           {form.scheduleBlocks.map((block, index) => (
             <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1 }}>
               <TextField
                 select
-                label="Weekday"
+                label="Día"
                 value={block.weekday}
                 onChange={(event) => updateBlock(index, 'weekday', event.target.value)}
                 sx={{ minWidth: 150 }}
               >
                 {WEEKDAYS.map((day) => (
-                  <MenuItem key={day.value} value={day.value}>{day.label}</MenuItem>
+                  <MenuItem key={day.value} value={day.value}>
+                    {labelFor(WEEKDAY_LABELS, day.value)}
+                  </MenuItem>
                 ))}
               </TextField>
               <TextField
                 select
-                label="Module"
+                label="Módulo"
                 value={block.module}
                 onChange={(event) => updateBlock(index, 'module', event.target.value)}
                 sx={{ minWidth: 110 }}
@@ -389,25 +410,25 @@ export default function SectionsPage() {
                 ))}
               </TextField>
               <Button color="error" onClick={() => removeBlock(index)} disabled={form.scheduleBlocks.length === 1}>
-                Remove
+                Quitar
               </Button>
             </Box>
           ))}
-          <Button onClick={addBlock} sx={{ mt: 1 }}>Add block</Button>
+          <Button onClick={addBlock} sx={{ mt: 1 }}>Agregar bloque</Button>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancelar</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? 'Guardando...' : 'Guardar'}
           </Button>
         </DialogActions>
       </Dialog>
 
       <ConfirmDialog
         open={Boolean(toDelete)}
-        title="Delete section"
-        message={`Delete section ${toDelete?.subjectCode}? It cannot have enrolled students.`}
-        confirmLabel="Delete"
+        title="Eliminar sección"
+        message={`¿Eliminar la sección ${toDelete?.subjectCode}? No debe tener estudiantes inscritos.`}
+        confirmLabel="Eliminar"
         loading={deleting}
         onConfirm={confirmDelete}
         onClose={() => setToDelete(null)}

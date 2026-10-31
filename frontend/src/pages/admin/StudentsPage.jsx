@@ -18,11 +18,14 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import careerService from '../../services/careerService';
 import studentService from '../../services/studentService';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import PageHeader from '../../components/common/PageHeader';
+import { STUDENT_STATUS_LABELS, labelFor } from '../../ui/labels';
+import { isValidRun } from '../../ui/validation';
 import { getErrorMessage } from '../../http-common';
 
 const MANUAL_STATUSES = ['REGULAR', 'POSTPONEMENT', 'TEMPORARY_WITHDRAWAL'];
@@ -41,6 +44,7 @@ const emptyForm = {
   lastName: '',
   email: '',
   careerId: '',
+  temporaryPassword: '',
 };
 
 /** Students: register, edit, change the manual status and delete. */
@@ -98,11 +102,18 @@ export default function StudentsPage() {
       lastName: student.lastName,
       email: student.email,
       careerId: String(student.careerId),
+      temporaryPassword: '',
     });
     setFormOpen(true);
   };
 
   const handleSave = async () => {
+    if (!editing && !isValidRun(form.run.trim())) {
+      setError('El RUN debe tener el formato 1111111-1.');
+      setSuccess('');
+      return;
+    }
+
     setSaving(true);
     setError('');
     setSuccess('');
@@ -115,13 +126,14 @@ export default function StudentsPage() {
           email: form.email,
           careerId: Number(form.careerId),
         });
-        setSuccess(`Student ${editing.run} updated.`);
+        setSuccess(`Estudiante ${editing.run} actualizado.`);
       } else {
         await studentService.create({
           ...form,
+          run: form.run.trim(),
           careerId: Number(form.careerId),
         });
-        setSuccess(`Student ${form.run} created.`);
+        setSuccess(`Estudiante ${form.run} creado. Debe cambiar la contraseña en su primer inicio de sesión.`);
       }
       setFormOpen(false);
       await loadData();
@@ -145,7 +157,7 @@ export default function StudentsPage() {
     setSuccess('');
     try {
       await studentService.changeStatus(statusTarget.id, newStatus);
-      setSuccess(`Student ${statusTarget.run} is now ${newStatus}.`);
+      setSuccess(`El estudiante ${statusTarget.run} ahora está ${labelFor(STUDENT_STATUS_LABELS, newStatus)}.`);
       setStatusTarget(null);
       await loadData();
     } catch (requestError) {
@@ -161,7 +173,7 @@ export default function StudentsPage() {
     setSuccess('');
     try {
       await studentService.remove(toDelete.id);
-      setSuccess(`Student ${toDelete.run} deleted.`);
+      setSuccess(`Estudiante ${toDelete.run} eliminado.`);
       setToDelete(null);
       await loadData();
     } catch (requestError) {
@@ -172,12 +184,22 @@ export default function StudentsPage() {
     }
   };
 
+  const runError =
+    !editing && form.run.length > 0 && !isValidRun(form.run.trim())
+      ? 'Formato esperado: 1111111-1'
+      : '';
+
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>Students</Typography>
-        <Button variant="contained" onClick={openCreate}>New student</Button>
-      </Box>
+      <PageHeader
+        title="Estudiantes"
+        subtitle="Registra estudiantes, actualiza sus datos y administra su estado académico."
+        action={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}>
+            Nuevo estudiante
+          </Button>
+        }
+      />
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
@@ -190,12 +212,12 @@ export default function StudentsPage() {
             <TableHead>
               <TableRow>
                 <TableCell>RUN</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Career</TableCell>
-                <TableCell>Study plan</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>Nombre</TableCell>
+                <TableCell>Correo</TableCell>
+                <TableCell>Carrera</TableCell>
+                <TableCell>Plan de estudio</TableCell>
+                <TableCell>Estado</TableCell>
+                <TableCell align="right">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -209,22 +231,22 @@ export default function StudentsPage() {
                   <TableCell>
                     <Chip
                       size="small"
-                      label={student.status}
+                      label={labelFor(STUDENT_STATUS_LABELS, student.status)}
                       color={STATUS_COLOR[student.status] ?? 'default'}
                     />
                   </TableCell>
                   <TableCell align="right">
-                    <Button size="small" onClick={() => openEdit(student)}>Edit</Button>
-                    <Button size="small" onClick={() => openStatus(student)}>Status</Button>
+                    <Button size="small" onClick={() => openEdit(student)}>Editar</Button>
+                    <Button size="small" onClick={() => openStatus(student)}>Estado</Button>
                     <Button size="small" color="error" onClick={() => setToDelete(student)}>
-                      Delete
+                      Eliminar
                     </Button>
                   </TableCell>
                 </TableRow>
               ))}
               {students.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">No students yet.</TableCell>
+                  <TableCell colSpan={7} align="center">Aún no hay estudiantes registrados.</TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -233,7 +255,7 @@ export default function StudentsPage() {
       )}
 
       <Dialog open={formOpen} onClose={saving ? undefined : () => setFormOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>{editing ? 'Edit student' : 'New student'}</DialogTitle>
+        <DialogTitle>{editing ? 'Editar estudiante' : 'Nuevo estudiante'}</DialogTitle>
         <DialogContent>
           {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
           <TextField
@@ -243,24 +265,27 @@ export default function StudentsPage() {
             value={form.run}
             onChange={(event) => setForm({ ...form, run: event.target.value })}
             disabled={Boolean(editing)}
-            helperText={editing ? 'RUN cannot be changed.' : ''}
+            error={Boolean(runError)}
+            helperText={
+              editing ? 'El RUN no se puede modificar.' : runError || 'Formato: 1111111-1'
+            }
           />
           <TextField
-            label="First name"
+            label="Nombre"
             fullWidth
             margin="dense"
             value={form.firstName}
             onChange={(event) => setForm({ ...form, firstName: event.target.value })}
           />
           <TextField
-            label="Last name"
+            label="Apellido"
             fullWidth
             margin="dense"
             value={form.lastName}
             onChange={(event) => setForm({ ...form, lastName: event.target.value })}
           />
           <TextField
-            label="Email"
+            label="Correo"
             type="email"
             fullWidth
             margin="dense"
@@ -269,7 +294,7 @@ export default function StudentsPage() {
           />
           <TextField
             select
-            label="Career"
+            label="Carrera"
             fullWidth
             margin="dense"
             value={form.careerId}
@@ -281,11 +306,25 @@ export default function StudentsPage() {
               </MenuItem>
             ))}
           </TextField>
+          {!editing && (
+            <TextField
+              label="Contraseña temporal"
+              type="password"
+              fullWidth
+              margin="dense"
+              value={form.temporaryPassword}
+              onChange={(event) =>
+                setForm({ ...form, temporaryPassword: event.target.value })
+              }
+              helperText="El estudiante deberá cambiarla en su primer inicio de sesión."
+              autoComplete="new-password"
+            />
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancelar</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? 'Guardando...' : 'Guardar'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -294,35 +333,37 @@ export default function StudentsPage() {
         open={Boolean(statusTarget)}
         onClose={statusSaving ? undefined : () => setStatusTarget(null)}
       >
-        <DialogTitle>Change student status</DialogTitle>
+        <DialogTitle>Cambiar estado del estudiante</DialogTitle>
         <DialogContent>
           {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
           <TextField
             select
-            label="Status"
+            label="Estado"
             fullWidth
             margin="dense"
             value={newStatus}
             onChange={(event) => setNewStatus(event.target.value)}
           >
             {MANUAL_STATUSES.map((status) => (
-              <MenuItem key={status} value={status}>{status}</MenuItem>
+              <MenuItem key={status} value={status}>
+                {labelFor(STUDENT_STATUS_LABELS, status)}
+              </MenuItem>
             ))}
           </TextField>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setStatusTarget(null)} disabled={statusSaving}>Cancel</Button>
+          <Button onClick={() => setStatusTarget(null)} disabled={statusSaving}>Cancelar</Button>
           <Button variant="contained" onClick={handleStatus} disabled={statusSaving}>
-            {statusSaving ? 'Saving...' : 'Save'}
+            {statusSaving ? 'Guardando...' : 'Guardar'}
           </Button>
         </DialogActions>
       </Dialog>
 
       <ConfirmDialog
         open={Boolean(toDelete)}
-        title="Delete student"
-        message={`Delete ${toDelete?.run}? A student with enrollments or history cannot be deleted.`}
-        confirmLabel="Delete"
+        title="Eliminar estudiante"
+        message={`¿Eliminar ${toDelete?.run}? Un estudiante con inscripciones o historial no se puede eliminar.`}
+        confirmLabel="Eliminar"
         loading={deleting}
         onConfirm={confirmDelete}
         onClose={() => setToDelete(null)}

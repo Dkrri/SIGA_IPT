@@ -20,6 +20,12 @@ import {
 import academicPeriodService from '../../services/academicPeriodService';
 import gradeService from '../../services/gradeService';
 import sectionService from '../../services/sectionService';
+import PageHeader from '../../components/common/PageHeader';
+import {
+  ACADEMIC_PERIOD_STATUS_LABELS,
+  ENROLLMENT_RESULT_LABELS,
+  labelFor,
+} from '../../ui/labels';
 import { getErrorMessage } from '../../http-common';
 
 const RESULT_COLOR = {
@@ -118,7 +124,7 @@ export default function SectionGradesPage() {
     const value = parseGrade(drafts[enrollmentId]);
 
     if (value === null || Number.isNaN(value) || value < 1 || value > 7) {
-      setError('Grade must be a number between 1.0 and 7.0.');
+      setError('La nota debe ser un número entre 1.0 y 7.0.');
       setSuccess('');
       return;
     }
@@ -143,7 +149,7 @@ export default function SectionGradesPage() {
             ? ''
             : String(saved.finalGrade),
       }));
-      setSuccess(`Grade saved for ${saved.studentRun}.`);
+      setSuccess(`Nota guardada para ${saved.studentRun}.`);
     } catch (requestError) {
       setError(getErrorMessage(requestError));
     } finally {
@@ -162,32 +168,27 @@ export default function SectionGradesPage() {
   return (
     <Box>
       <Button onClick={() => navigate('/teacher/sections')} sx={{ mb: 1 }}>
-        Back to my sections
+        Volver a mis secciones
       </Button>
 
-      <Typography variant="h4" gutterBottom>
-        Section Grades
-      </Typography>
-
-      {section && (
-        <>
-          <Typography variant="h6">
-            {section.subjectCode} - {section.subjectName}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Period {section.academicPeriodCode} ·{' '}
-            {section.scheduleBlocks.map((block) => block.code).join(', ')} ·{' '}
-            {grades.length} enrolled
-          </Typography>
-        </>
-      )}
+      <PageHeader
+        title="Notas de la sección"
+        subtitle={
+          section
+            ? `${section.subjectCode} - ${section.subjectName} · Período ${section.academicPeriodCode} · ${section.scheduleBlocks
+                .map((block) => block.code)
+                .join(', ')} · ${grades.length} inscritos`
+            : undefined
+        }
+      />
 
       {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ my: 2 }}>{success}</Alert>}
 
       {period && !isOpen && (
         <Alert severity="warning" sx={{ my: 2 }}>
-          The academic period is {period.status}. Grades are read-only.
+          El período académico está {labelFor(ACADEMIC_PERIOD_STATUS_LABELS, period.status)}.
+          Las notas son de solo lectura.
         </Alert>
       )}
 
@@ -197,10 +198,10 @@ export default function SectionGradesPage() {
             <TableHead>
               <TableRow>
                 <TableCell>RUN</TableCell>
-                <TableCell>Student</TableCell>
-                <TableCell>Grade</TableCell>
-                <TableCell>Result</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>Estudiante</TableCell>
+                <TableCell>Nota</TableCell>
+                <TableCell>Resultado</TableCell>
+                <TableCell align="right">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -231,7 +232,7 @@ export default function SectionGradesPage() {
                   <TableCell>
                     <Chip
                       size="small"
-                      label={grade.result}
+                      label={labelFor(ENROLLMENT_RESULT_LABELS, grade.result)}
                       color={RESULT_COLOR[grade.result] ?? 'default'}
                     />
                   </TableCell>
@@ -244,7 +245,7 @@ export default function SectionGradesPage() {
                       }
                       onClick={() => handleSave(grade.enrollmentId)}
                     >
-                      {savingId === grade.enrollmentId ? 'Saving...' : 'Save'}
+                      {savingId === grade.enrollmentId ? 'Guardando...' : 'Guardar'}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -253,7 +254,7 @@ export default function SectionGradesPage() {
               {grades.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} align="center">
-                    No students are enrolled in this section.
+                    No hay estudiantes inscritos en esta sección.
                   </TableCell>
                 </TableRow>
               )}
@@ -264,7 +265,7 @@ export default function SectionGradesPage() {
 
       <Stack sx={{ mt: 2 }}>
         <Typography variant="caption" color="text.secondary">
-          Grades range from 1.0 to 7.0. A grade of 4.0 or higher is APPROVED.
+          Las notas van de 1.0 a 7.0. Una nota igual o superior a 4.0 se considera aprobada.
         </Typography>
       </Stack>
     </Box>

@@ -42,6 +42,7 @@ services:
       - "8081:8080"
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+      - ./keycloak/themes:/opt/keycloak/themes:ro
 
 volumes:
   siga_mysql_data:

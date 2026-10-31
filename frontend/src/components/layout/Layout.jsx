@@ -1,7 +1,6 @@
 import { Box, Toolbar } from '@mui/material';
 import AppHeader from './AppHeader';
 import Sidebar from './Sidebar';
-import { DRAWER_WIDTH } from './menuItems';
 import { getPrimaryRole } from '../../auth/keycloak';
 
 /**
@@ -12,16 +11,20 @@ export default function Layout({ children }) {
   const role = getPrimaryRole();
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
       <AppHeader role={role} />
       <Sidebar role={role} />
 
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, width: `calc(100% - ${DRAWER_WIDTH}px)` }}
+        sx={{
+          flexGrow: 1,
+          minWidth: 0,
+          p: { xs: 2, md: 3 },
+        }}
       >
         <Toolbar />
-        {children}
+        <Box sx={{ maxWidth: 1500, mx: 'auto' }}>{children}</Box>
       </Box>
     </Box>
   );

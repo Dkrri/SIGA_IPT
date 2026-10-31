@@ -20,11 +20,13 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import careerService from '../../services/careerService';
 import studyPlanService from '../../services/studyPlanService';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import PageHeader from '../../components/common/PageHeader';
+import { STUDY_PLAN_STATUS_LABELS, labelFor } from '../../ui/labels';
 import { getErrorMessage } from '../../http-common';
 
 const emptyForm = { code: '', year: new Date().getFullYear(), current: true };
@@ -97,7 +99,7 @@ export default function StudyPlansPage() {
         careerId: Number(careerId),
         current: form.current,
       });
-      setSuccess(`Study plan ${form.code} created.`);
+      setSuccess(`Plan de estudio ${form.code} creado.`);
       setFormOpen(false);
       await loadPlans(careerId);
     } catch (requestError) {
@@ -112,7 +114,7 @@ export default function StudyPlansPage() {
     setSuccess('');
     try {
       await studyPlanService.setCurrent(plan.id);
-      setSuccess(`Study plan ${plan.code} is now current.`);
+      setSuccess(`El plan de estudio ${plan.code} ahora está vigente.`);
       await loadPlans(careerId);
     } catch (requestError) {
       setError(getErrorMessage(requestError));
@@ -125,7 +127,7 @@ export default function StudyPlansPage() {
     setSuccess('');
     try {
       await studyPlanService.remove(toDelete.id);
-      setSuccess(`Study plan ${toDelete.code} deleted.`);
+      setSuccess(`Plan de estudio ${toDelete.code} eliminado.`);
       setToDelete(null);
       await loadPlans(careerId);
     } catch (requestError) {
@@ -138,19 +140,27 @@ export default function StudyPlansPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>Study Plans</Typography>
-        <Button variant="contained" onClick={openCreate} disabled={!careerId}>
-          New plan
-        </Button>
-      </Box>
+      <PageHeader
+        title="Planes de estudio"
+        subtitle="Organiza los planes de cada carrera y define cuál está vigente."
+        action={
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={openCreate}
+            disabled={!careerId}
+          >
+            Nuevo plan
+          </Button>
+        }
+      />
 
       <TextField
         select
-        label="Career"
+        label="Carrera"
         value={careerId}
         onChange={(event) => setCareerId(event.target.value)}
-        sx={{ minWidth: 260, mb: 2 }}
+        sx={{ minWidth: 280, mb: 2 }}
       >
         {careers.map((career) => (
           <MenuItem key={career.id} value={String(career.id)}>
@@ -169,10 +179,10 @@ export default function StudyPlansPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Code</TableCell>
-                <TableCell>Year</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>Código</TableCell>
+                <TableCell>Año</TableCell>
+                <TableCell>Estado</TableCell>
+                <TableCell align="right">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -183,18 +193,18 @@ export default function StudyPlansPage() {
                   <TableCell>
                     <Chip
                       size="small"
-                      label={plan.status === 'ACTIVE' ? 'CURRENT' : plan.status}
+                      label={labelFor(STUDY_PLAN_STATUS_LABELS, plan.status)}
                       color={plan.status === 'ACTIVE' ? 'success' : 'default'}
                     />
                   </TableCell>
                   <TableCell align="right">
                     {plan.status !== 'ACTIVE' && (
                       <Button size="small" onClick={() => handleSetCurrent(plan)}>
-                        Set current
+                        Marcar vigente
                       </Button>
                     )}
                     <Button size="small" color="error" onClick={() => setToDelete(plan)}>
-                      Delete
+                      Eliminar
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -202,7 +212,7 @@ export default function StudyPlansPage() {
               {plans.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} align="center">
-                    This career has no study plans.
+                    Esta carrera no tiene planes de estudio.
                   </TableCell>
                 </TableRow>
               )}
@@ -212,18 +222,18 @@ export default function StudyPlansPage() {
       )}
 
       <Dialog open={formOpen} onClose={saving ? undefined : () => setFormOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>New study plan</DialogTitle>
+        <DialogTitle>Nuevo plan de estudio</DialogTitle>
         <DialogContent>
           {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
           <TextField
-            label="Code"
+            label="Código"
             fullWidth
             margin="dense"
             value={form.code}
             onChange={(event) => setForm({ ...form, code: event.target.value })}
           />
           <TextField
-            label="Year"
+            label="Año"
             type="number"
             fullWidth
             margin="dense"
@@ -238,22 +248,22 @@ export default function StudyPlansPage() {
                 onChange={(event) => setForm({ ...form, current: event.target.checked })}
               />
             }
-            label="Set as the current plan of the career"
+            label="Marcar como plan vigente de la carrera"
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancelar</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving}>
-            {saving ? 'Creating...' : 'Create'}
+            {saving ? 'Creando...' : 'Crear'}
           </Button>
         </DialogActions>
       </Dialog>
 
       <ConfirmDialog
         open={Boolean(toDelete)}
-        title="Delete study plan"
-        message={`Delete ${toDelete?.code}? It cannot have associated students.`}
-        confirmLabel="Delete"
+        title="Eliminar plan de estudio"
+        message={`¿Eliminar ${toDelete?.code}? No debe tener estudiantes asociados.`}
+        confirmLabel="Eliminar"
         loading={deleting}
         onConfirm={confirmDelete}
         onClose={() => setToDelete(null)}

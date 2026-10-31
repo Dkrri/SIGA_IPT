@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import academicPeriodService from '../../services/academicPeriodService';
 import enrollmentService from '../../services/enrollmentService';
+import PageHeader from '../../components/common/PageHeader';
 import { getErrorMessage } from '../../http-common';
 
 const MAX_SUBJECTS = 6;
@@ -94,7 +95,7 @@ export default function AvailableSubjectsPage() {
     setSuccess('');
     try {
       await enrollmentService.enroll(selected);
-      setSuccess('Enrollment completed successfully.');
+      setSuccess('Inscripción realizada correctamente.');
 
       // Refresh the offer (seats change and already-enrolled subjects disappear).
       const response = await enrollmentService.getAvailable(periodId);
@@ -109,20 +110,21 @@ export default function AvailableSubjectsPage() {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Available Subjects
-      </Typography>
+      <PageHeader
+        title="Asignaturas disponibles"
+        subtitle="Selecciona entre 3 y 6 asignaturas del período académico abierto."
+      />
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       {periods.length === 0 ? (
         // Do not show the "no periods" hint when the real problem was a failed request.
-        !error && <Alert severity="info">There are no open academic periods.</Alert>
+        !error && <Alert severity="info">No hay períodos académicos abiertos.</Alert>
       ) : (
         <>
           <TextField
             select
-            label="Academic period"
+            label="Período académico"
             value={periodId}
             onChange={(event) => setPeriodId(event.target.value)}
             sx={{ minWidth: 240, mb: 2 }}
@@ -145,12 +147,12 @@ export default function AvailableSubjectsPage() {
                   <TableHead>
                     <TableRow>
                       <TableCell padding="checkbox" />
-                      <TableCell>Code</TableCell>
-                      <TableCell>Subject</TableCell>
-                      <TableCell>Semester</TableCell>
-                      <TableCell>Teacher</TableCell>
-                      <TableCell>Seats</TableCell>
-                      <TableCell>Schedule</TableCell>
+                      <TableCell>Código</TableCell>
+                      <TableCell>Asignatura</TableCell>
+                      <TableCell>Semestre</TableCell>
+                      <TableCell>Docente</TableCell>
+                      <TableCell>Cupos</TableCell>
+                      <TableCell>Horario</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -184,7 +186,7 @@ export default function AvailableSubjectsPage() {
                     {subjects.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={7} align="center">
-                          No available subjects for this period.
+                          No hay asignaturas disponibles para este período.
                         </TableCell>
                       </TableRow>
                     )}
@@ -194,14 +196,14 @@ export default function AvailableSubjectsPage() {
 
               <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography variant="body2">
-                  Selected: {selected.length} (minimum 3, maximum 6)
+                  Seleccionadas: {selected.length} (mínimo 3, máximo 6)
                 </Typography>
                 <Button
                   variant="contained"
                   disabled={selected.length === 0 || submitting}
                   onClick={handleEnroll}
                 >
-                  {submitting ? 'Enrolling...' : 'Enroll'}
+                  {submitting ? 'Inscribiendo...' : 'Inscribirse'}
                 </Button>
               </Box>
             </>

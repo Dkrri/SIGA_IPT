@@ -3,6 +3,7 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -18,11 +19,18 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
 } from '@mui/material';
 import academicPeriodService from '../../services/academicPeriodService';
 import enrollmentService from '../../services/enrollmentService';
+import PageHeader from '../../components/common/PageHeader';
+import { ENROLLMENT_RESULT_LABELS, labelFor } from '../../ui/labels';
 import { getErrorMessage } from '../../http-common';
+
+const RESULT_COLOR = {
+  APPROVED: 'success',
+  FAILED: 'error',
+  PENDING: 'default',
+};
 
 /**
  * Enrollments of the authenticated student in a selected period.
@@ -88,13 +96,14 @@ export default function MyEnrollmentsPage() {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        My Enrollments
-      </Typography>
+      <PageHeader
+        title="Mis inscripciones"
+        subtitle="Consulta las asignaturas en las que te inscribiste y anula las que necesites."
+      />
 
       <TextField
         select
-        label="Academic period"
+        label="Período académico"
         value={periodId}
         onChange={(event) => setPeriodId(event.target.value)}
         sx={{ minWidth: 240, mb: 2 }}
@@ -115,12 +124,12 @@ export default function MyEnrollmentsPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Subject</TableCell>
-                <TableCell>Code</TableCell>
-                <TableCell>Period</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Grade</TableCell>
-                <TableCell>Result</TableCell>
+                <TableCell>Asignatura</TableCell>
+                <TableCell>Código</TableCell>
+                <TableCell>Período</TableCell>
+                <TableCell>Fecha</TableCell>
+                <TableCell>Nota</TableCell>
+                <TableCell>Resultado</TableCell>
                 <TableCell />
               </TableRow>
             </TableHead>
@@ -132,17 +141,23 @@ export default function MyEnrollmentsPage() {
                   <TableCell>{enrollment.academicPeriodCode}</TableCell>
                   <TableCell>
                     {enrollment.enrolledAt
-                      ? new Date(enrollment.enrolledAt).toLocaleString()
+                      ? new Date(enrollment.enrolledAt).toLocaleDateString('es-CL')
                       : '-'}
                   </TableCell>
                   <TableCell>{enrollment.finalGrade ?? '-'}</TableCell>
-                  <TableCell>{enrollment.result}</TableCell>
+                  <TableCell>
+                    <Chip
+                      size="small"
+                      label={labelFor(ENROLLMENT_RESULT_LABELS, enrollment.result)}
+                      color={RESULT_COLOR[enrollment.result] ?? 'default'}
+                    />
+                  </TableCell>
                   <TableCell>
                     <Button
                       color="error"
                       onClick={() => setToCancel(enrollment)}
                     >
-                      Cancel
+                      Anular
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -151,7 +166,7 @@ export default function MyEnrollmentsPage() {
               {enrollments.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} align="center">
-                    No enrollments for this period.
+                    No tienes inscripciones en este período.
                   </TableCell>
                 </TableRow>
               )}
@@ -161,16 +176,16 @@ export default function MyEnrollmentsPage() {
       )}
 
       <Dialog open={Boolean(toCancel)} onClose={() => setToCancel(null)}>
-        <DialogTitle>Cancel enrollment</DialogTitle>
+        <DialogTitle>Anular inscripción</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Cancel the enrollment in {toCancel?.subjectName}?
+            ¿Anular la inscripción en {toCancel?.subjectName}?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setToCancel(null)}>No</Button>
           <Button color="error" onClick={confirmCancel}>
-            Yes, cancel
+            Sí, anular
           </Button>
         </DialogActions>
       </Dialog>

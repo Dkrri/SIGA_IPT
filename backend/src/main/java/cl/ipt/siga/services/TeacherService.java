@@ -40,6 +40,7 @@ public class TeacherService {
     private final TeacherRepository teacherRepository;
     private final SectionRepository sectionRepository;
     private final TeacherMapper teacherMapper;
+    private final KeycloakAdminService keycloakAdminService;
 
     // ------------------------------------------------------------------
     // Operations
@@ -53,7 +54,14 @@ public class TeacherService {
         TeacherEntity teacher = teacherMapper.toEntity(request);
         teacher.setStatus(TeacherStatus.ACTIVE);
 
-        return teacherMapper.toResponse(teacherRepository.save(teacher));
+        TeacherEntity saved = teacherRepository.save(teacher);
+        keycloakAdminService.createUser(
+                saved.getEmail(),
+                saved.getFirstName(),
+                saved.getLastName(),
+                request.getTemporaryPassword(),
+                "TEACHER");
+        return teacherMapper.toResponse(saved);
     }
 
     @Transactional

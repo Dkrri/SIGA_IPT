@@ -87,6 +87,11 @@
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -132,9 +137,8 @@
                 </executions>
             </plugin>
             <!--
-                Test coverage. For now it only generates the report (target/site/jacoco).
-                The rule requiring >= 90% in the service layer (job 'check') will be enabled
-                on day 29 of the plan, once the service classes exist. See docs/decisiones.md.
+                Test coverage. Generates target/site/jacoco and enforces
+                >= 90% line coverage for the service layer in the 'verify' phase.
             -->
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -153,6 +157,30 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <includes>
+                                        <include>cl.ipt.siga.services.*</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.90</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

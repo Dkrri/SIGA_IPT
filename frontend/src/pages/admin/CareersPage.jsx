@@ -17,10 +17,12 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import careerService from '../../services/careerService';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import PageHeader from '../../components/common/PageHeader';
+import { CAREER_STATUS_LABELS, labelFor } from '../../ui/labels';
 import { getErrorMessage } from '../../http-common';
 
 const emptyForm = { code: '', name: '', description: '' };
@@ -80,10 +82,10 @@ export default function CareersPage() {
     try {
       if (editing) {
         await careerService.update(editing.id, form);
-        setSuccess(`Career ${form.code} updated.`);
+        setSuccess(`Carrera ${form.code} actualizada.`);
       } else {
         await careerService.create(form);
-        setSuccess(`Career ${form.code} created.`);
+        setSuccess(`Carrera ${form.code} creada.`);
       }
       setFormOpen(false);
       await loadCareers();
@@ -100,7 +102,7 @@ export default function CareersPage() {
     try {
       const status = career.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
       await careerService.changeStatus(career.id, status);
-      setSuccess(`Career ${career.code} is now ${status}.`);
+      setSuccess(`La carrera ${career.code} ahora está ${labelFor(CAREER_STATUS_LABELS, status)}.`);
       await loadCareers();
     } catch (requestError) {
       setError(getErrorMessage(requestError));
@@ -113,7 +115,7 @@ export default function CareersPage() {
     setSuccess('');
     try {
       await careerService.remove(toDelete.id);
-      setSuccess(`Career ${toDelete.code} deleted.`);
+      setSuccess(`Carrera ${toDelete.code} eliminada.`);
       setToDelete(null);
       await loadCareers();
     } catch (requestError) {
@@ -126,10 +128,15 @@ export default function CareersPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>Careers</Typography>
-        <Button variant="contained" onClick={openCreate}>New career</Button>
-      </Box>
+      <PageHeader
+        title="Carreras"
+        subtitle="Administra las carreras disponibles y su estado."
+        action={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}>
+            Nueva carrera
+          </Button>
+        }
+      />
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
@@ -141,11 +148,11 @@ export default function CareersPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Code</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Semesters</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>Código</TableCell>
+                <TableCell>Nombre</TableCell>
+                <TableCell>Semestres</TableCell>
+                <TableCell>Estado</TableCell>
+                <TableCell align="right">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -157,24 +164,24 @@ export default function CareersPage() {
                   <TableCell>
                     <Chip
                       size="small"
-                      label={career.status}
+                      label={labelFor(CAREER_STATUS_LABELS, career.status)}
                       color={career.status === 'ACTIVE' ? 'success' : 'default'}
                     />
                   </TableCell>
                   <TableCell align="right">
-                    <Button size="small" onClick={() => openEdit(career)}>Edit</Button>
+                    <Button size="small" onClick={() => openEdit(career)}>Editar</Button>
                     <Button size="small" onClick={() => handleStatus(career)}>
-                      {career.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                      {career.status === 'ACTIVE' ? 'Desactivar' : 'Activar'}
                     </Button>
                     <Button size="small" color="error" onClick={() => setToDelete(career)}>
-                      Delete
+                      Eliminar
                     </Button>
                   </TableCell>
                 </TableRow>
               ))}
               {careers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">No careers yet.</TableCell>
+                  <TableCell colSpan={5} align="center">Aún no hay carreras registradas.</TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -183,25 +190,25 @@ export default function CareersPage() {
       )}
 
       <Dialog open={formOpen} onClose={saving ? undefined : () => setFormOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>{editing ? 'Edit career' : 'New career'}</DialogTitle>
+        <DialogTitle>{editing ? 'Editar carrera' : 'Nueva carrera'}</DialogTitle>
         <DialogContent>
           {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
           <TextField
-            label="Code"
+            label="Código"
             fullWidth
             margin="dense"
             value={form.code}
             onChange={(event) => setForm({ ...form, code: event.target.value })}
           />
           <TextField
-            label="Name"
+            label="Nombre"
             fullWidth
             margin="dense"
             value={form.name}
             onChange={(event) => setForm({ ...form, name: event.target.value })}
           />
           <TextField
-            label="Description"
+            label="Descripción"
             fullWidth
             multiline
             minRows={2}
@@ -211,18 +218,18 @@ export default function CareersPage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancelar</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? 'Guardando...' : 'Guardar'}
           </Button>
         </DialogActions>
       </Dialog>
 
       <ConfirmDialog
         open={Boolean(toDelete)}
-        title="Delete career"
-        message={`Delete ${toDelete?.code}? It cannot have study plans or students.`}
-        confirmLabel="Delete"
+        title="Eliminar carrera"
+        message={`¿Eliminar ${toDelete?.code}? No debe tener planes de estudio ni estudiantes asociados.`}
+        confirmLabel="Eliminar"
         loading={deleting}
         onConfirm={confirmDelete}
         onClose={() => setToDelete(null)}

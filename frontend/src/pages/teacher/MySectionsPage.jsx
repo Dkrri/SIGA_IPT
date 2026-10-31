@@ -12,9 +12,9 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
 } from '@mui/material';
 import sectionService from '../../services/sectionService';
+import PageHeader from '../../components/common/PageHeader';
 import { getErrorMessage } from '../../http-common';
 
 /**
@@ -45,12 +45,10 @@ export default function MySectionsPage() {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        My Sections
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Sections assigned to you. Open one to register final grades.
-      </Typography>
+      <PageHeader
+        title="Mis secciones"
+        subtitle="Secciones asignadas a tu cuenta. Abre una para registrar las notas finales."
+      />
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
@@ -61,12 +59,12 @@ export default function MySectionsPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Code</TableCell>
-                <TableCell>Subject</TableCell>
-                <TableCell>Period</TableCell>
-                <TableCell>Schedule</TableCell>
-                <TableCell>Capacity</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>Código</TableCell>
+                <TableCell>Asignatura</TableCell>
+                <TableCell>Período</TableCell>
+                <TableCell>Horario</TableCell>
+                <TableCell>Inscritos / Cupos</TableCell>
+                <TableCell align="right">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -78,14 +76,16 @@ export default function MySectionsPage() {
                   <TableCell>
                     {section.scheduleBlocks.map((block) => block.code).join(', ')}
                   </TableCell>
-                  <TableCell>{section.capacity}</TableCell>
+                  <TableCell>
+                    <strong>{section.enrolledCount ?? 0}</strong> / {section.capacity}
+                  </TableCell>
                   <TableCell align="right">
                     <Button
                       size="small"
                       variant="outlined"
                       onClick={() => navigate(`/teacher/sections/${section.id}/grades`)}
                     >
-                      Grades
+                      Notas
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -94,7 +94,7 @@ export default function MySectionsPage() {
               {sections.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
-                    You have no assigned sections.
+                    No tienes secciones asignadas.
                   </TableCell>
                 </TableRow>
               )}

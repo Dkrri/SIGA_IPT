@@ -1,9 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Layout from './components/layout';
 import ProtectedRoute from './auth/ProtectedRoute';
 import { getPrimaryRole } from './auth/keycloak';
+import theme from './theme';
 import RoleHome from './pages/RoleHome';
 import Unauthorized from './pages/Unauthorized';
 import AvailableSubjectsPage from './pages/student/AvailableSubjectsPage';
@@ -18,13 +19,6 @@ import TeachersPage from './pages/admin/TeachersPage';
 import StudentsPage from './pages/admin/StudentsPage';
 import SectionsPage from './pages/admin/SectionsPage';
 import MatriculationsPage from './pages/admin/MatriculationsPage';
-
-const theme = createTheme({
-  palette: {
-    primary: { main: '#0b5c8a' },
-    secondary: { main: '#f2a900' },
-  },
-});
 
 const ADMIN = ['ADMIN'];
 const TEACHER = ['TEACHER'];

@@ -10,7 +10,8 @@ export default function PlaceholderPage({ title }) {
       <Card>
         <CardContent>
           <Typography variant="body1">
-            This section is part of the skeleton. Implement its UI and connect it to the API next.
+            Esta sección forma parte del esqueleto inicial. Su interfaz se implementará
+            y conectará con la API próximamente.
           </Typography>
         </CardContent>
       </Card>

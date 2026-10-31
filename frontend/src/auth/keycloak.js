@@ -27,4 +27,21 @@ export function getPrimaryRole() {
   return null;
 }
 
+/**
+ * Human-friendly name for greetings.
+ * Prefers the full name from the token, then the email prefix.
+ */
+export function getDisplayName() {
+  const token = keycloak.tokenParsed ?? {};
+  const fullName = [token.given_name, token.family_name]
+    .filter(Boolean)
+    .join(' ');
+  return (
+    fullName ||
+    token.name ||
+    token.preferred_username?.split('@')[0] ||
+    ''
+  );
+}
+
 export default keycloak;

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import keycloak from './auth/keycloak';
+import { translateErrorMessage } from './ui/errorMessages';
 
 /**
  * Axios instance used by every service.
@@ -36,9 +37,13 @@ http.interceptors.response.use(
   }
 );
 
-/** Reads the message from the backend ApiErrorResponse. */
+/** Reads the message from the backend ApiErrorResponse and translates it to Spanish. */
 export function getErrorMessage(error) {
-  return error?.response?.data?.message ?? error?.message ?? 'Unexpected error';
+  const message =
+    error?.response?.data?.message ??
+    error?.message ??
+    'Unexpected error';
+  return translateErrorMessage(message);
 }
 
 export default http;

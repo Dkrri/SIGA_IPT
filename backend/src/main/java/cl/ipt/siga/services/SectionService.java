@@ -69,7 +69,7 @@ public class SectionService {
         validateTeacherSchedule(teacher, period, request.getScheduleBlocks(), null);
 
         SectionEntity section = sectionMapper.toEntity(request, subject, period, teacher);
-        return sectionMapper.toResponse(sectionRepository.save(section));
+        return toResponse(sectionRepository.save(section));
     }
 
     @Transactional
@@ -101,7 +101,7 @@ public class SectionService {
             section.getScheduleBlocks().add(block);
         }
 
-        return sectionMapper.toResponse(sectionRepository.save(section));
+        return toResponse(sectionRepository.save(section));
     }
 
     @Transactional
@@ -118,20 +118,20 @@ public class SectionService {
     @Transactional(readOnly = true)
     public List<SectionResponse> findAll() {
         return sectionRepository.findAll().stream()
-                .map(sectionMapper::toResponse)
+                .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public SectionResponse findById(Long id) {
-        return sectionMapper.toResponse(getOrThrow(id));
+        return toResponse(getOrThrow(id));
     }
 
     @Transactional(readOnly = true)
     public List<SectionResponse> findByAcademicPeriod(Long academicPeriodId) {
         AcademicPeriodEntity period = getPeriodOrThrow(academicPeriodId);
         return sectionRepository.findByAcademicPeriod(period).stream()
-                .map(sectionMapper::toResponse)
+                .map(this::toResponse)
                 .toList();
     }
 
@@ -139,8 +139,15 @@ public class SectionService {
     public List<SectionResponse> findByTeacher(Long teacherId) {
         TeacherEntity teacher = getTeacherOrThrow(teacherId);
         return sectionRepository.findByTeacher(teacher).stream()
-                .map(sectionMapper::toResponse)
+                .map(this::toResponse)
                 .toList();
+    }
+
+    /** Adds the current enrollment count to the section DTO. */
+    private SectionResponse toResponse(SectionEntity section) {
+        SectionResponse response = sectionMapper.toResponse(section);
+        response.setEnrolledCount((int) enrollmentRepository.countBySection(section));
+        return response;
     }
 
     // ------------------------------------------------------------------

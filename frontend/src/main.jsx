@@ -22,10 +22,10 @@ keycloak
   })
   .catch((error) => {
     root.render(
-      <div style={{ fontFamily: 'sans-serif', padding: 24 }}>
-        <h2>Could not connect to Keycloak</h2>
-        <p>{error?.message ?? String(error)}</p>
-        <p>Check that Keycloak is running on http://localhost:8081.</p>
+      <div style={{ fontFamily: 'Inter, Roboto, Arial, sans-serif', padding: 32 }}>
+        <h2>No se pudo conectar con Keycloak</h2>
+        <p>Verifica que Keycloak esté corriendo en http://localhost:8081.</p>
+        <p>Detalle: {error?.message ?? String(error)}</p>
       </div>
     );
   });

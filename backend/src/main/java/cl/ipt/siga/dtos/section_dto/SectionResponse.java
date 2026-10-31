@@ -32,5 +32,8 @@ public class SectionResponse {
 
     private Integer capacity;
 
+    /** Current number of enrollments in the section. */
+    private Integer enrolledCount;
+
     private List<ScheduleBlockResponse> scheduleBlocks = new ArrayList<>();
 }

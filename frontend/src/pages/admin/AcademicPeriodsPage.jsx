@@ -18,10 +18,12 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import academicPeriodService from '../../services/academicPeriodService';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import PageHeader from '../../components/common/PageHeader';
+import { ACADEMIC_PERIOD_STATUS_LABELS, labelFor } from '../../ui/labels';
 import { getErrorMessage } from '../../http-common';
 
 const emptyForm = { year: new Date().getFullYear(), semester: '1' };
@@ -75,7 +77,7 @@ export default function AcademicPeriodsPage() {
         year: Number(form.year),
         semester: Number(form.semester),
       });
-      setSuccess(`Academic period ${response.data.code} created.`);
+      setSuccess(`Período académico ${response.data.code} creado.`);
       setFormOpen(false);
       await loadPeriods();
     } catch (requestError) {
@@ -104,14 +106,15 @@ export default function AcademicPeriodsPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>
-          Academic Periods
-        </Typography>
-        <Button variant="contained" onClick={openCreate}>
-          New period
-        </Button>
-      </Box>
+      <PageHeader
+        title="Períodos académicos"
+        subtitle="Crea períodos y ciérralos cuando todas las notas estén registradas."
+        action={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}>
+            Nuevo período
+          </Button>
+        }
+      />
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
@@ -121,9 +124,9 @@ export default function AcademicPeriodsPage() {
           sx={{ mb: 2 }}
           onClose={() => setClosingResult(null)}
         >
-          Period {closingResult.academicPeriodCode} closed. Consolidated enrollments:{' '}
-          {closingResult.consolidatedEnrollments}, graduated: {closingResult.graduatedStudents},
-          eliminated: {closingResult.eliminatedStudents}.
+          Período {closingResult.academicPeriodCode} cerrado. Inscripciones consolidadas:{' '}
+          {closingResult.consolidatedEnrollments}, graduados: {closingResult.graduatedStudents},
+          eliminados: {closingResult.eliminatedStudents}.
         </Alert>
       )}
 
@@ -134,11 +137,11 @@ export default function AcademicPeriodsPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Code</TableCell>
-                <TableCell>Year</TableCell>
-                <TableCell>Semester</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>Código</TableCell>
+                <TableCell>Año</TableCell>
+                <TableCell>Semestre</TableCell>
+                <TableCell>Estado</TableCell>
+                <TableCell align="right">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -150,7 +153,7 @@ export default function AcademicPeriodsPage() {
                   <TableCell>
                     <Chip
                       size="small"
-                      label={period.status}
+                      label={labelFor(ACADEMIC_PERIOD_STATUS_LABELS, period.status)}
                       color={period.status === 'OPEN' ? 'success' : 'default'}
                     />
                   </TableCell>
@@ -162,7 +165,7 @@ export default function AcademicPeriodsPage() {
                         variant="outlined"
                         onClick={() => setToClose(period)}
                       >
-                        Close
+                        Cerrar
                       </Button>
                     )}
                   </TableCell>
@@ -171,7 +174,7 @@ export default function AcademicPeriodsPage() {
               {periods.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} align="center">
-                    No academic periods yet.
+                    Aún no hay períodos académicos.
                   </TableCell>
                 </TableRow>
               )}
@@ -181,11 +184,11 @@ export default function AcademicPeriodsPage() {
       )}
 
       <Dialog open={formOpen} onClose={saving ? undefined : () => setFormOpen(false)}>
-        <DialogTitle>New academic period</DialogTitle>
+        <DialogTitle>Nuevo período académico</DialogTitle>
         <DialogContent>
           {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
           <TextField
-            label="Year"
+            label="Año"
             type="number"
             fullWidth
             margin="dense"
@@ -195,7 +198,7 @@ export default function AcademicPeriodsPage() {
           />
           <TextField
             select
-            label="Semester"
+            label="Semestre"
             fullWidth
             margin="dense"
             value={form.semester}
@@ -206,18 +209,18 @@ export default function AcademicPeriodsPage() {
           </TextField>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancelar</Button>
           <Button variant="contained" onClick={handleCreate} disabled={saving}>
-            {saving ? 'Creating...' : 'Create'}
+            {saving ? 'Creando...' : 'Crear'}
           </Button>
         </DialogActions>
       </Dialog>
 
       <ConfirmDialog
         open={Boolean(toClose)}
-        title="Close academic period"
-        message={`Close ${toClose?.code}? Every enrollment must have a grade. This action cannot be undone.`}
-        confirmLabel="Close period"
+        title="Cerrar período académico"
+        message={`¿Cerrar ${toClose?.code}? Todas las inscripciones deben tener nota. Esta acción no se puede deshacer.`}
+        confirmLabel="Cerrar período"
         loading={closing}
         onConfirm={confirmClose}
         onClose={() => setToClose(null)}

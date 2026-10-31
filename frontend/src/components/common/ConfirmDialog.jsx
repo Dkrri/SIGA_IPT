@@ -1,4 +1,12 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 /**
  * Reusable confirmation dialog for destructive or irreversible actions.
@@ -8,7 +16,7 @@ export default function ConfirmDialog({
   open,
   title,
   message,
-  confirmLabel = 'Confirm',
+  confirmLabel = 'Confirmar',
   color = 'error',
   loading = false,
   onConfirm,
@@ -16,13 +24,16 @@ export default function ConfirmDialog({
 }) {
   return (
     <Dialog open={open} onClose={loading ? undefined : onClose}>
-      <DialogTitle>{title}</DialogTitle>
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <WarningAmberIcon color="warning" />
+        {title}
+      </DialogTitle>
       <DialogContent>
         <DialogContentText>{message}</DialogContentText>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} disabled={loading}>
-          Cancel
+          Cancelar
         </Button>
         <Button
           onClick={onConfirm}
@@ -30,7 +41,7 @@ export default function ConfirmDialog({
           variant="contained"
           disabled={loading}
         >
-          {loading ? 'Working...' : confirmLabel}
+          {loading ? 'Procesando...' : confirmLabel}
         </Button>
       </DialogActions>
     </Dialog>

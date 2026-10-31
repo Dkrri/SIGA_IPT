@@ -10,6 +10,12 @@ body,
 }
 
 body {
-  font-family: Roboto, Arial, sans-serif;
-  background: #f5f6f8;
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background: #f4f7fb;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
 }

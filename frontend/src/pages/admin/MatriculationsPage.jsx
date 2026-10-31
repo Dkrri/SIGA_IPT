@@ -17,11 +17,13 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import academicPeriodService from '../../services/academicPeriodService';
 import matriculationService from '../../services/matriculationService';
 import studentService from '../../services/studentService';
+import PageHeader from '../../components/common/PageHeader';
+import { ACADEMIC_PERIOD_STATUS_LABELS, labelFor } from '../../ui/labels';
 import { getErrorMessage } from '../../http-common';
 
 /** Minimal matriculation record: student + academic period. */
@@ -100,7 +102,7 @@ export default function MatriculationsPage() {
         studentId: Number(form.studentId),
         academicPeriodId: Number(form.academicPeriodId),
       });
-      setSuccess('Student matriculated.');
+      setSuccess('Estudiante matriculado correctamente.');
       setFormOpen(false);
       if (String(form.academicPeriodId) === periodId) {
         await loadMatriculations(periodId);
@@ -116,23 +118,31 @@ export default function MatriculationsPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>Matriculations</Typography>
-        <Button variant="contained" onClick={openCreate} disabled={students.length === 0}>
-          New matriculation
-        </Button>
-      </Box>
+      <PageHeader
+        title="Matrículas"
+        subtitle="Registra la matrícula de un estudiante en un período académico."
+        action={
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={openCreate}
+            disabled={students.length === 0}
+          >
+            Nueva matrícula
+          </Button>
+        }
+      />
 
       <TextField
         select
-        label="Academic period"
+        label="Período académico"
         value={periodId}
         onChange={(event) => setPeriodId(event.target.value)}
-        sx={{ minWidth: 240, mb: 2 }}
+        sx={{ minWidth: 260, mb: 2 }}
       >
         {periods.map((period) => (
           <MenuItem key={period.id} value={String(period.id)}>
-            {period.code} ({period.status})
+            {period.code} ({labelFor(ACADEMIC_PERIOD_STATUS_LABELS, period.status)})
           </MenuItem>
         ))}
       </TextField>
@@ -147,9 +157,9 @@ export default function MatriculationsPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Student RUN</TableCell>
-                <TableCell>Period</TableCell>
-                <TableCell>Registered at</TableCell>
+                <TableCell>RUN del estudiante</TableCell>
+                <TableCell>Período</TableCell>
+                <TableCell>Fecha de registro</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -167,7 +177,7 @@ export default function MatriculationsPage() {
               {matriculations.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={3} align="center">
-                    No matriculations in this period.
+                    No hay matrículas en este período.
                   </TableCell>
                 </TableRow>
               )}
@@ -177,12 +187,12 @@ export default function MatriculationsPage() {
       )}
 
       <Dialog open={formOpen} onClose={saving ? undefined : () => setFormOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>New matriculation</DialogTitle>
+        <DialogTitle>Nueva matrícula</DialogTitle>
         <DialogContent>
           {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
           <TextField
             select
-            label="Student"
+            label="Estudiante"
             fullWidth
             margin="dense"
             value={form.studentId}
@@ -196,7 +206,7 @@ export default function MatriculationsPage() {
           </TextField>
           <TextField
             select
-            label="Academic period"
+            label="Período académico"
             fullWidth
             margin="dense"
             value={form.academicPeriodId}
@@ -204,15 +214,15 @@ export default function MatriculationsPage() {
           >
             {periods.map((period) => (
               <MenuItem key={period.id} value={String(period.id)}>
-                {period.code} ({period.status})
+                {period.code} ({labelFor(ACADEMIC_PERIOD_STATUS_LABELS, period.status)})
               </MenuItem>
             ))}
           </TextField>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancelar</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? 'Guardando...' : 'Guardar'}
           </Button>
         </DialogActions>
       </Dialog>

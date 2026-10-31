@@ -25,10 +25,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import careerService from '../../services/careerService';
 import studyPlanService from '../../services/studyPlanService';
 import subjectService from '../../services/subjectService';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import PageHeader from '../../components/common/PageHeader';
 import { getErrorMessage } from '../../http-common';
 
 const emptyForm = {
@@ -145,7 +147,7 @@ export default function SubjectsPage() {
     const value = event.target.value;
     const next = typeof value === 'string' ? value.split(',') : value;
     if (next.length > 3) {
-      setError('A subject can have at most 3 prerequisites.');
+      setError('Una asignatura puede tener como máximo 3 prerrequisitos.');
       return;
     }
     setForm({ ...form, prerequisiteIds: next });
@@ -170,10 +172,10 @@ export default function SubjectsPage() {
 
       if (editing) {
         await subjectService.update(editing.id, payload);
-        setSuccess(`Subject ${form.code} updated.`);
+        setSuccess(`Asignatura ${form.code} actualizada.`);
       } else {
         await subjectService.create(payload);
-        setSuccess(`Subject ${form.code} created.`);
+        setSuccess(`Asignatura ${form.code} creada.`);
       }
       setFormOpen(false);
       await loadSubjects(planId);
@@ -190,7 +192,7 @@ export default function SubjectsPage() {
     setSuccess('');
     try {
       await subjectService.remove(toDelete.id);
-      setSuccess(`Subject ${toDelete.code} deleted.`);
+      setSuccess(`Asignatura ${toDelete.code} eliminada.`);
       setToDelete(null);
       await loadSubjects(planId);
     } catch (requestError) {
@@ -213,24 +215,32 @@ export default function SubjectsPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>Subjects</Typography>
-        <Button variant="contained" onClick={openCreate} disabled={!planId}>
-          New subject
-        </Button>
-      </Box>
+      <PageHeader
+        title="Asignaturas"
+        subtitle="Administra las asignaturas, sus horas TEL, créditos SCT y prerrequisitos."
+        action={
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={openCreate}
+            disabled={!planId}
+          >
+            Nueva asignatura
+          </Button>
+        }
+      />
 
       <TextField
         select
-        label="Study plan"
+        label="Plan de estudio"
         value={planId}
         onChange={(event) => setPlanId(event.target.value)}
-        sx={{ minWidth: 320, mb: 2 }}
+        sx={{ minWidth: 340, mb: 2 }}
       >
         {plans.map((plan) => (
           <MenuItem key={plan.id} value={String(plan.id)}>
             {plan.careerName} - {plan.code} ({plan.year})
-            {plan.status === 'ACTIVE' ? ' - current' : ''}
+            {plan.status === 'ACTIVE' ? ' - vigente' : ''}
           </MenuItem>
         ))}
       </TextField>
@@ -245,13 +255,13 @@ export default function SubjectsPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Code</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Semester</TableCell>
+                <TableCell>Código</TableCell>
+                <TableCell>Nombre</TableCell>
+                <TableCell>Semestre</TableCell>
                 <TableCell>TEL</TableCell>
                 <TableCell>SCT</TableCell>
-                <TableCell>Prerequisites</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>Prerrequisitos</TableCell>
+                <TableCell align="right">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -266,9 +276,9 @@ export default function SubjectsPage() {
                     {subject.prerequisites.map((item) => item.code).join(', ') || '-'}
                   </TableCell>
                   <TableCell align="right">
-                    <Button size="small" onClick={() => openEdit(subject)}>Edit</Button>
+                    <Button size="small" onClick={() => openEdit(subject)}>Editar</Button>
                     <Button size="small" color="error" onClick={() => setToDelete(subject)}>
-                      Delete
+                      Eliminar
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -276,7 +286,7 @@ export default function SubjectsPage() {
               {subjects.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} align="center">
-                    This study plan has no subjects.
+                    Este plan de estudio no tiene asignaturas.
                   </TableCell>
                 </TableRow>
               )}
@@ -286,18 +296,18 @@ export default function SubjectsPage() {
       )}
 
       <Dialog open={formOpen} onClose={saving ? undefined : () => setFormOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>{editing ? 'Edit subject' : 'New subject'}</DialogTitle>
+        <DialogTitle>{editing ? 'Editar asignatura' : 'Nueva asignatura'}</DialogTitle>
         <DialogContent>
           {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
           <TextField
-            label="Code"
+            label="Código"
             fullWidth
             margin="dense"
             value={form.code}
             onChange={(event) => updateField('code', event.target.value)}
           />
           <TextField
-            label="Name"
+            label="Nombre"
             fullWidth
             margin="dense"
             value={form.name}
@@ -305,7 +315,7 @@ export default function SubjectsPage() {
           />
           <TextField
             select
-            label="Semester"
+            label="Semestre"
             fullWidth
             margin="dense"
             value={form.semester}
@@ -317,7 +327,7 @@ export default function SubjectsPage() {
           </TextField>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <TextField
-              label="Theory hours"
+              label="Horas teoría"
               type="number"
               margin="dense"
               value={form.theoryHours}
@@ -325,7 +335,7 @@ export default function SubjectsPage() {
               slotProps={{ htmlInput: { min: 0 } }}
             />
             <TextField
-              label="Exercise hours"
+              label="Horas ejercicios"
               type="number"
               margin="dense"
               value={form.exerciseHours}
@@ -333,7 +343,7 @@ export default function SubjectsPage() {
               slotProps={{ htmlInput: { min: 0 } }}
             />
             <TextField
-              label="Lab hours"
+              label="Horas laboratorio"
               type="number"
               margin="dense"
               value={form.labHours}
@@ -342,8 +352,8 @@ export default function SubjectsPage() {
             />
           </Box>
           <Typography variant="caption" color={telTotal >= 8 ? 'error' : 'text.secondary'}>
-            TEL total: {telTotal}. It must be less than 8; sections need an even TEL
-            (blocks = TEL / 2).
+            TEL total: {telTotal}. Debe ser menor que 8; las secciones necesitan un TEL
+            par (bloques = TEL / 2).
           </Typography>
           <TextField
             label="SCT"
@@ -355,10 +365,10 @@ export default function SubjectsPage() {
             slotProps={{ htmlInput: { min: 1, max: 7 } }}
           />
           <FormControl fullWidth margin="dense">
-            <InputLabel>Prerequisites</InputLabel>
+            <InputLabel>Prerrequisitos</InputLabel>
             <Select
               multiple
-              label="Prerequisites"
+              label="Prerrequisitos"
               value={form.prerequisiteIds}
               onChange={handlePrerequisites}
               renderValue={(selected) =>
@@ -373,30 +383,30 @@ export default function SubjectsPage() {
                   <Checkbox checked={form.prerequisiteIds.includes(subject.id)} />
                   <ListItemText
                     primary={`${subject.code} - ${subject.name}`}
-                    secondary={`Semester ${subject.semester}`}
+                    secondary={`Semestre ${subject.semester}`}
                   />
                 </MenuItem>
               ))}
             </Select>
-            <FormHelperText>{form.prerequisiteIds.length}/3 selected</FormHelperText>
+            <FormHelperText>{form.prerequisiteIds.length}/3 seleccionados</FormHelperText>
           </FormControl>
           <Typography variant="caption" color="text.secondary">
-            Only subjects from previous semesters of the same plan (maximum 3).
+            Solo asignaturas de semestres anteriores del mismo plan (máximo 3).
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={() => setFormOpen(false)} disabled={saving}>Cancelar</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? 'Guardando...' : 'Guardar'}
           </Button>
         </DialogActions>
       </Dialog>
 
       <ConfirmDialog
         open={Boolean(toDelete)}
-        title="Delete subject"
-        message={`Delete ${toDelete?.code}? It cannot have sections, enrollments or academic history.`}
-        confirmLabel="Delete"
+        title="Eliminar asignatura"
+        message={`¿Eliminar ${toDelete?.code}? No debe tener secciones, inscripciones ni historial académico.`}
+        confirmLabel="Eliminar"
         loading={deleting}
         onConfirm={confirmDelete}
         onClose={() => setToDelete(null)}

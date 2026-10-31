@@ -42,6 +42,7 @@ public class StudentService {
     private final StudyPlanRepository studyPlanRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final AcademicRecordRepository academicRecordRepository;
+    private final KeycloakAdminService keycloakAdminService;
 
     /** Statuses the ADMIN can assign manually. */
     private static final Set<StudentStatus> MANUALLY_ASSIGNABLE =
@@ -65,7 +66,14 @@ public class StudentService {
         StudentEntity student = studentMapper.toEntity(request, career, studyPlan);
         student.setStatus(REGULAR);
 
-        return studentMapper.toResponse(studentRepository.save(student));
+        StudentEntity saved = studentRepository.save(student);
+        keycloakAdminService.createUser(
+                saved.getEmail(),
+                saved.getFirstName(),
+                saved.getLastName(),
+                request.getTemporaryPassword(),
+                "STUDENT");
+        return studentMapper.toResponse(saved);
     }
 
     @Transactional
